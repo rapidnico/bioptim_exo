@@ -48,3 +48,5 @@ class Models(Enum):
 
     WU_AND_KINOVA_WITHOUT_FLOATING_BASE_WITH_ROTOTRANS_SUPPORT_TEMPLATE = Path(__file__).parent.__str__() + "/KINOVA_merge_without_floating_base_with_rototrans_template.bioMod"
     WU_AND_KINOVA_WITHOUT_FLOATING_BASE_WITH_ROTOTRANS_SUPPORT_VARIABLES = Path(__file__).parent.__str__() + "/KINOVA_merge_without_floating_base_with_rototrans_template_with_variables.bioMod"
+
+    Stanford_VA_upper_limb_model_0_40 = Path(__file__).parent.__str__() + "/Stanford_VA_upper_limb_model_0_40.bioMod"
