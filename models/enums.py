@@ -38,6 +38,7 @@ class Models(Enum):
     WU_WITHOUT_MODIF_QUAT = Path(__file__).parent.__str__() + "/wu_converted_definitif_without_modif_quat.bioMod"
 
     WU_AND_KINOVA = Path(__file__).parent.__str__() + "/KINOVA_merge.bioMod"
+    WU_AND_KINOVA_6_DOF = Path(__file__).parent.__str__() + "/KINOVA_merge_6dof.bioMod"
     WU_AND_KINOVA_INVERSE_KINEMATICS = Path(__file__).parent.__str__() + "/KINOVA_merge_inverse_kinematics.bioMod"
 
     WU_AND_KINOVA_WITHOUT_FLOATING_BASE_TEMPLATE = Path(__file__).parent.__str__() + "/KINOVA_merge_without_floating_base_template.bioMod"
