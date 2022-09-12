@@ -4,7 +4,7 @@ version 4
 
 // Biomod not include all Osim features as the optimisation is performed on a third part software.
 // The original file contained some of these features, corresponding warnings are shown in the end of the file.
-// comment from line 694 (after humerus) to the end
+// comment from line 700 (after humerus) to the end
 
 gravity	0 -9.8066499999999994 0
 
@@ -13,7 +13,7 @@ gravity	0 -9.8066499999999994 0
 // Information about thorax segment
 	// Segment
 	segment thorax_parent_offset
-		parent ground 
+		parent ground
 		RTinMatrix	0
 		RT	0 0 0	xyz	0 0 0
 	endsegment
@@ -689,7 +689,14 @@ gravity	0 -9.8066499999999994 0
 		meshscale	1 1 1
 	endsegment
 
-	// Markers
+
+    // Markers
+    marker    EPI_lat
+        parent    humerus
+        position    0.010673315684115781 -0.30325282179572699 0.037331347018280669
+    endmarker
+
+
 
 /* // Information about ulna segment
 	// Segment
@@ -5915,6 +5922,16 @@ endmusclegroup
 			musclegroup	radius_to_firstmc
 			position	0.0062899999999999996 0.0032299999999999998 -0.0058900000000000003
 		endviapoint */
+
+// Ground
+segment ground
+endsegment
+
+    // Markers on ground
+    marker m1
+        parent ground
+        position -0.0242 0.137 0.438
+    endmarker
 
 /*-------------- WARNINGS---------------
 
