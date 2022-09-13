@@ -144,77 +144,108 @@ for j in range(0, n_frames):
 
 print(ALL_Q_humerus)
 
-# Q_X_Membres = [ALL_Q_sterno_clav_R2[:, 0],
-#                 ALL_Q_sterno_clav_R3[:, 0],
-#                 ALL_Q_unrot_scap_R3[:, 0],
-#                 ALL_Q_unrot_scap_R2[:, 0],
-#                 ALL_Q_accromioclaviculaire_R2[:, 0],
-#                 ALL_Q_accromioclaviculaire_R3[:, 0],
-#                 ALL_Q_accromioclaviculaire_R1[:, 0],
-#                 ALL_Q_unrot_hum_R1[:, 0],
-#                 ALL_Q_unrot_hum_R3[:, 0],
-#                 ALL_Q_unrot_hum_R2[:, 0]
-#                ]
-# Q_Y_Membres = [ALL_Q_sterno_clav_R2[:, 1],
-#                 ALL_Q_sterno_clav_R3[:, 1],
-#                 ALL_Q_unrot_scap_R3[:, 1],
-#                 ALL_Q_unrot_scap_R2[:, 1],
-#                 ALL_Q_accromioclaviculaire_R2[:, 1],
-#                 ALL_Q_accromioclaviculaire_R3[:, 1],
-#                 ALL_Q_accromioclaviculaire_R1[:, 1],
-#                 ALL_Q_unrot_hum_R1[:, 1],
-#                 ALL_Q_unrot_hum_R3[:, 1],
-#                 ALL_Q_unrot_hum_R2[:, 1]
-#                ]
-# Q_Z_Membres = [ALL_Q_sterno_clav_R2[:, 2],
-#                 ALL_Q_sterno_clav_R3[:, 2],
-#                 ALL_Q_unrot_scap_R3[:, 2],
-#                 ALL_Q_unrot_scap_R2[:, 2],
-#                 ALL_Q_accromioclaviculaire_R2[:, 2],
-#                 ALL_Q_accromioclaviculaire_R3[:, 2],
-#                 ALL_Q_accromioclaviculaire_R1[:, 2],
-#                 ALL_Q_unrot_hum_R1[:, 2],
-#                 ALL_Q_unrot_hum_R3[:, 2],
-#                 ALL_Q_unrot_hum_R2[:, 2]
-#                ]
-
-for i in range(0,2):
-    for j in range(0,2):
-
-        fig, axs = plt.subplots(2, 5)
-
-        axs[0, 0].plot(ALL_Q_humerus[:,i], ALL_Q_sterno_clav_R2[:,2], 'tab:red')
-        axs[0, 0].set_title("sterno_clav_R2 " + j + " par elev hum " + i)
-
-        axs[0, 1].plot(ALL_Q_humerus[:,i], ALL_Q_sterno_clav_R3[:,2], 'tab:red')
-        axs[0, 1].set_title("sterno_clav_R3 " + j + " par elev hum " + i)
-
-        axs[0, 2].plot(ALL_Q_humerus[:,i], ALL_Q_unrot_scap_R3[:,2], 'tab:red')
-        axs[0, 2].set_title("unrot_scap_R3 " + j + " par elev hum " + i)
-
-        axs[0, 3].plot(ALL_Q_humerus[:,i], ALL_Q_unrot_scap_R2[:,2], 'tab:red')
-        axs[0, 3].set_title("unrot_scap_R2 " + j + " par elev hum " + i)
-
-        axs[0, 4].plot(ALL_Q_humerus[:,i], ALL_Q_accromioclaviculaire_R2[:,2], 'tab:red')
-        axs[0, 4].set_title("accromioclaviculaire_R2 " + j + " par elev hum " + i)
-
-        axs[1, 0].plot(ALL_Q_humerus[:,i], ALL_Q_accromioclaviculaire_R3[:,2], 'tab:red')
-        axs[1, 0].set_title("accromioclaviculaire_R3 " + j + " par elev hum " + i)
-
-        axs[1, 1].plot(ALL_Q_humerus[:,i], ALL_Q_accromioclaviculaire_R1[:,2], 'tab:red')
-        axs[1, 1].set_title("accromioclaviculaire_R1 " + j + " par elev hum " + i)
-
-        axs[1, 2].plot(ALL_Q_humerus[:,i], ALL_Q_unrot_hum_R1[:,2], 'tab:red')
-        axs[1, 2].set_title("unrot_hum_R1 " + j + " par elev hum " + i)
-
-        axs[1, 3].plot(ALL_Q_humerus[:,i], ALL_Q_unrot_hum_R3[:,2], 'tab:red')
-        axs[1, 3].set_title("unrot_hum_R3 " + j + " par elev hum " + i)
-
-        axs[1, 4].plot(ALL_Q_humerus[:,i], ALL_Q_unrot_hum_R2[:,2], 'tab:red')
-        axs[1, 4].set_title("unrot_hum_R2 " + j + " par elev hum " + i)
 
 
 
+
+fig, axsX = plt.subplots(2, 5)
+
+axsX[0, 0].plot(ALL_Q_humerus[:,1], ALL_Q_sterno_clav_R2[:,0], 'tab:red')
+axsX[0, 0].set_title("sterno_clav_R2 x par elev hum y")
+
+axsX[0, 1].plot(ALL_Q_humerus[:,1], ALL_Q_sterno_clav_R3[:,0], 'tab:red')
+axsX[0, 1].set_title("sterno_clav_R3 x par elev hum y")
+
+axsX[0, 2].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_scap_R3[:,0], 'tab:red')
+axsX[0, 2].set_title("unrot_scap_R3 x par elev hum y")
+
+axsX[0, 3].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_scap_R2[:,0], 'tab:red')
+axsX[0, 3].set_title("unrot_scap_R2 x par elev hum y")
+
+axsX[0, 4].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R2[:,0], 'tab:red')
+axsX[0, 4].set_title("accromioclaviculaire_R2 x par elev hum y")
+
+axsX[1, 0].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R3[:,0], 'tab:red')
+axsX[1, 0].set_title("accromioclaviculaire_R3 x par elev hum y")
+
+axsX[1, 1].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R1[:,0], 'tab:red')
+axsX[1, 1].set_title("accromioclaviculaire_R1 x par elev hum y")
+
+axsX[1, 2].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R1[:,0], 'tab:red')
+axsX[1, 2].set_title("unrot_hum_R1 x par elev hum y")
+
+axsX[1, 3].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R3[:,0], 'tab:red')
+axsX[1, 3].set_title("unrot_hum_R3 x par elev hum y")
+
+axsX[1, 4].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R2[:,0], 'tab:red')
+axsX[1, 4].set_title("unrot_hum_R2 x x par elev hum y")
+
+
+fig, axsY = plt.subplots(2, 5)
+
+axsY[0, 0].plot(ALL_Q_humerus[:,1], ALL_Q_sterno_clav_R2[:,1], 'tab:red')
+axsY[0, 0].set_title("sterno_clav_R2 y par elev hum y")
+
+axsY[0, 1].plot(ALL_Q_humerus[:,1], ALL_Q_sterno_clav_R3[:,1], 'tab:red')
+axsY[0, 1].set_title("sterno_clav_R3 y par elev hum y")
+
+axsY[0, 2].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_scap_R3[:,1], 'tab:red')
+axsY[0, 2].set_title("unrot_scap_R3 y par elev hum y")
+
+axsY[0, 3].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_scap_R2[:,1], 'tab:red')
+axsY[0, 3].set_title("unrot_scap_R2 y par elev hum y")
+
+axsY[0, 4].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R2[:,1], 'tab:red')
+axsY[0, 4].set_title("accromioclaviculaire_R2 y par elev hum y")
+
+axsY[1, 0].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R3[:,1], 'tab:red')
+axsY[1, 0].set_title("accromioclaviculaire_R3 y par elev hum y")
+
+axsY[1, 1].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R1[:,1], 'tab:red')
+axsY[1, 1].set_title("accromioclaviculaire_R1 y par elev hum y")
+
+axsY[1, 2].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R1[:,1], 'tab:red')
+axsY[1, 2].set_title("unrot_hum_R1 y par elev hum y")
+
+axsY[1, 3].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R3[:,1], 'tab:red')
+axsY[1, 3].set_title("unrot_hum_R3 y par elev hum y")
+
+axsY[1, 4].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R2[:,1], 'tab:red')
+axsY[1, 4].set_title("unrot_hum_R2 y par elev hum y")
+
+
+
+fig, axsZ = plt.subplots(2, 5)
+
+axsZ[0, 0].plot(ALL_Q_humerus[:,1], ALL_Q_sterno_clav_R2[:,2], 'tab:red')
+axsZ[0, 0].set_title("sterno_clav_R2 z par elev hum y")
+
+axsZ[0, 1].plot(ALL_Q_humerus[:,1], ALL_Q_sterno_clav_R3[:,2], 'tab:red')
+axsZ[0, 1].set_title("sterno_clav_R3 z par elev hum y")
+
+axsZ[0, 2].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_scap_R3[:,2], 'tab:red')
+axsZ[0, 2].set_title("unrot_scap_R3 z par elev hum y")
+
+axsZ[0, 3].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_scap_R2[:,2], 'tab:red')
+axsZ[0, 3].set_title("unrot_scap_R2 z par elev hum y")
+
+axsZ[0, 4].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R2[:,2], 'tab:red')
+axsZ[0, 4].set_title("accromioclaviculaire_R2 z par elev hum y")
+
+axsZ[1, 0].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R3[:,2], 'tab:red')
+axsZ[1, 0].set_title("accromioclaviculaire_R3 z par elev hum y")
+
+axsZ[1, 1].plot(ALL_Q_humerus[:,1], ALL_Q_accromioclaviculaire_R1[:,2], 'tab:red')
+axsZ[1, 1].set_title("accromioclaviculaire_R1 z par elev hum y")
+
+axsZ[1, 2].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R1[:,2], 'tab:red')
+axsZ[1, 2].set_title("unrot_hum_R1 z par elev hum y")
+
+axsZ[1, 3].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R3[:,2], 'tab:red')
+axsZ[1, 3].set_title("unrot_hum_R3 z par elev hum y")
+
+axsZ[1, 4].plot(ALL_Q_humerus[:,1], ALL_Q_unrot_hum_R2[:,2], 'tab:red')
+axsZ[1, 4].set_title("unrot_hum_R2 z par elev hum y")
 
 plt.show()
 # We have Rototrans_matrix_ulna_support, so, we are now able to transform the coordinates of any point in the support
