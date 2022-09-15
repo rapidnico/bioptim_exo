@@ -690,7 +690,7 @@ gravity	0 -9.8066499999999994 0
 	endsegment
 
 
-    // Markers
+   // Markers
     marker    EPI_lat
         parent    humerus
         position    0.010673315684115781 -0.30325282179572699 0.037331347018280669
@@ -698,7 +698,7 @@ gravity	0 -9.8066499999999994 0
 
 
 
-/* // Information about ulna segment
+// Information about ulna segment
 	// Segment
 	segment ulna_parent_offset
 		parent humerus 
@@ -729,7 +729,7 @@ gravity	0 -9.8066499999999994 0
 			0		0		0		1
 	endsegment
 
-	// Segment
+ /*	// Segment
 	segment ulna_rotation_1
 		parent ulna_rotation_0 
 		RTinMatrix	1
@@ -5921,7 +5921,7 @@ endmusclegroup
 			muscle	APL
 			musclegroup	radius_to_firstmc
 			position	0.0062899999999999996 0.0032299999999999998 -0.0058900000000000003
-		endviapoint */
+		endviapoint
 
 // Ground
 segment ground
@@ -5932,7 +5932,7 @@ endsegment
         parent ground
         position -0.0242 0.137 0.438
     endmarker
-
+*/
 /*-------------- WARNINGS---------------
 
 Some wrapping objects were present on the muscles :['DELT1', 'DELT2', 'DELT3', 'SUPSP', 'INFSP', 'SUBSC', 'TMIN', 'TMAJ', 'PECM1', 'PECM2', 'PECM3', 'LAT1', 'LAT2', 'LAT3', 'CORB', 'TRIlong', 'TRIlat', 'TRImed', 'ANC', 'SUP', 'BIClong', 'BICshort', 'BRD', 'ECRL', 'ECRB', 'ECU', 'FCR', 'FCU', 'PL', 'PT', 'PQ', 'FDSL', 'FDSR', 'FDSM', 'FDSI', 'FDPL', 'FDPR', 'FDPM', 'FDPI', 'EDCL', 'EDCR', 'EDCM', 'EDCI', 'EDM', 'EIP', 'EPL', 'EPB', 'FPL', 'APL'] in the original file force set.
