@@ -1,34 +1,18 @@
 import bioviz
-from matplotlib import pyplot as plt
-from enums import Models
 import numpy as np
 import biorbd
-from scipy import stats
 
 
-def matrice_1_rotation(nbSolide=int,
-                       n_frames=int,
-                       biorbd_model_path=str,
-                       amplitude_finale = int
-                       ):
+
+def matrice_1_rotation(
+        nbSolide: int,
+        n_frames: int,
+        biorbd_model_path: str,
+        all_q: np.ndarray,
+):
     biorbd_model = biorbd.Model(biorbd_model_path)
     Q0 = np.zeros((biorbd_model.nbQ()))
 
-    all_q = np.zeros((biorbd_model.nbQ(), n_frames))
-    all_q[11, :] = np.linspace(0, amplitude_finale, n_frames)
-    q_elevation = all_q[11, :]
-
-    for i in range(0, len(q_elevation)):
-        all_q[0, i] = q_elevation[i] * (-0.63355 / 2.61799)  # same as unrot_scap_R2
-        all_q[1, i] = q_elevation[i] * (0.322013 / 3.14159)  # same as unrot_scap_R3
-        all_q[2, i] = q_elevation[i] * (-0.322013 / 3.14159)
-        all_q[3, i] = q_elevation[i] * (0.633555 / 2.61799)
-        all_q[4, i] = q_elevation[i] * (-0.128282 / 2.61799)  # same as unrot_hum_R2
-        all_q[5, i] = q_elevation[i] * (1.03673 / 2.61799)  # same as unrot_hum_R3
-        all_q[6, i] = q_elevation[i] * (0.46603 / 2.61799)  # same as unrot_hum_R1
-        all_q[7, i] = q_elevation[i] * (-0.46603 / 2.61799)
-        all_q[8, i] = q_elevation[i] * (-1.03673 / 2.61799)
-        all_q[9, i] = q_elevation[i] * (0.128282 / 2.61799)
 
     Table_euler_angle = np.zeros((n_frames, 3))
     for j in range(0, n_frames):
@@ -49,36 +33,20 @@ def matrice_1_rotation(nbSolide=int,
 
 
 
-
-def matrice_2_rotation(nbSolide1=int,
-                       nbSolide2 = int,
-                       n_frames=int,
-                       biorbd_model_path=str,
-                       amplitude_finale=int
-                       ):
+def matrice_2_rotation(
+        nbSolide1: int,
+        nbSolide2: int,
+        n_frames: int,
+        biorbd_model_path: str,
+        all_q: np.ndarray,
+):
 
 
     biorbd_model = biorbd.Model(biorbd_model_path)
     sequence = 'xyz'
     Q0 = np.zeros((biorbd_model.nbQ()))
 
-    all_q = np.zeros((biorbd_model.nbQ(), n_frames))
-    all_q[11, :] = np.linspace(0, amplitude_finale, n_frames)
-    q_elevation = all_q[11, :]
 
-    for i in range(0, len(q_elevation)):
-        all_q[0, i] = q_elevation[i] * (-0.63355 / 2.61799)  # same as unrot_scap_R2
-        all_q[1, i] = q_elevation[i] * (0.322013 / 3.14159)  # same as unrot_scap_R3
-        all_q[2, i] = q_elevation[i] * (-0.322013 / 3.14159)
-        all_q[3, i] = q_elevation[i] * (0.633555 / 2.61799)
-        all_q[4, i] = q_elevation[i] * (-0.128282 / 2.61799)  # same as unrot_hum_R2
-        all_q[5, i] = q_elevation[i] * (1.03673 / 2.61799)  # same as unrot_hum_R3
-        all_q[6, i] = q_elevation[i] * (0.46603 / 2.61799)  # same as unrot_hum_R1
-        all_q[7, i] = q_elevation[i] * (-0.46603 / 2.61799)
-        all_q[8, i] = q_elevation[i] * (-1.03673 / 2.61799)
-        all_q[9, i] = q_elevation[i] * (0.128282 / 2.61799)
-
-    Table_euler_angle = np.zeros((n_frames, 3))
     Table_euler_angle1 = np.zeros((n_frames, 3))
     Table_euler_angle_2 = np.zeros((n_frames, 3))
 
@@ -122,38 +90,20 @@ def matrice_2_rotation(nbSolide1=int,
 
 
 
-
-
-def matrice_3_rotation(nbSolide1=int,
-                       nbSolide2 = int,
-                       nbSolide3 = int,
-                       n_frames=int,
-                       biorbd_model_path=str,
-                       amplitude_finale=int
-                       ):
-
+def matrice_3_rotation(
+        nbSolide1: int,
+        nbSolide2: int,
+        nbSolide3: int,
+        n_frames: int,
+        biorbd_model_path: str,
+        all_q: np.ndarray,
+):
 
     biorbd_model = biorbd.Model(biorbd_model_path)
     sequence = 'xyz'
     Q0 = np.zeros((biorbd_model.nbQ()))
 
-    all_q = np.zeros((biorbd_model.nbQ(), n_frames))
-    all_q[11, :] = np.linspace(0, amplitude_finale, n_frames)
-    q_elevation = all_q[11, :]
 
-    for i in range(0, len(q_elevation)):
-        all_q[0, i] = q_elevation[i] * (-0.63355 / 2.61799)  # same as unrot_scap_R2
-        all_q[1, i] = q_elevation[i] * (0.322013 / 3.14159)  # same as unrot_scap_R3
-        all_q[2, i] = q_elevation[i] * (-0.322013 / 3.14159)
-        all_q[3, i] = q_elevation[i] * (0.633555 / 2.61799)
-        all_q[4, i] = q_elevation[i] * (-0.128282 / 2.61799)  # same as unrot_hum_R2
-        all_q[5, i] = q_elevation[i] * (1.03673 / 2.61799)  # same as unrot_hum_R3
-        all_q[6, i] = q_elevation[i] * (0.46603 / 2.61799)  # same as unrot_hum_R1
-        all_q[7, i] = q_elevation[i] * (-0.46603 / 2.61799)
-        all_q[8, i] = q_elevation[i] * (-1.03673 / 2.61799)
-        all_q[9, i] = q_elevation[i] * (0.128282 / 2.61799)
-
-    Table_euler_angle = np.zeros((n_frames, 3))
     Table_euler_angle1 = np.zeros((n_frames, 3))
     Table_euler_angle_2 = np.zeros((n_frames, 3))
     Table_euler_angle_3 = np.zeros((n_frames, 3))
@@ -189,8 +139,8 @@ def matrice_3_rotation(nbSolide1=int,
 
         Matrice_rotation_2 = np.matmul(T0_2_base_inverse, T_2_base)
         M2 = biorbd.Rotation(Matrice_rotation_2[0, 0], Matrice_rotation_2[0, 1], Matrice_rotation_2[0, 2],
-                            Matrice_rotation_2[1, 0], Matrice_rotation_2[1, 1], Matrice_rotation_2[1, 2],
-                            Matrice_rotation_2[2, 0], Matrice_rotation_2[2, 1], Matrice_rotation_2[2, 2])
+                             Matrice_rotation_2[1, 0], Matrice_rotation_2[1, 1], Matrice_rotation_2[1, 2],
+                             Matrice_rotation_2[2, 0], Matrice_rotation_2[2, 1], Matrice_rotation_2[2, 2])
         Euler_angles_2 = biorbd.Rotation.toEulerAngles(M2, sequence).to_array()
         Table_euler_angle_2[j, :] = Euler_angles_2
 
@@ -203,17 +153,17 @@ def matrice_3_rotation(nbSolide1=int,
 
         T0_3_base_1 = np.matmul(T0_1, T0_3)
         T0_3_base_2 = np.matmul(T0_2_base_inverse, T0_3_base_1)
-
+        T0_3_base_2_inv = T0_3_base_2.transpose()
         # On fait de meme pour la matrice qui subit la rotation avec T_1 et T_2_base qu'on doit inverser
 
-        T_3 = biorbd_model.globalJCS(Q0, nbSolide3).rot().to_array()
-        T_1_undo = T_1.transpose()
+        T_3 = biorbd_model.globalJCS(Q, nbSolide3).rot().to_array()
+        # T_1_undo deja defini pour le solide 2
         T_2_base_undo = T_2_base.transpose()
 
         T_3_base_1 = np.matmul(T_1_undo, T_3)
         T_3_base_2 = np.matmul(T_2_base_undo, T_3_base_1)
 
-        Matrice_rotation_3 = np.matmul(T0_2_base_inverse, T_2_base)
+        Matrice_rotation_3 = np.matmul(T0_3_base_2_inv, T_3_base_2)
         M3 = biorbd.Rotation(Matrice_rotation_3[0, 0], Matrice_rotation_3[0, 1], Matrice_rotation_3[0, 2],
                             Matrice_rotation_3[1, 0], Matrice_rotation_3[1, 1], Matrice_rotation_3[1, 2],
                             Matrice_rotation_3[2, 0], Matrice_rotation_3[2, 1], Matrice_rotation_3[2, 2])
