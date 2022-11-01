@@ -169,12 +169,17 @@ gravity	0 0 -9.81
         parent    clavicle
         position    0.019644638836381262 -0.0077436347940661454 0.12124945256646524
     endmarker
-
-    marker    SCAP_Cor
-        parent    clavicle
-        position    0.0019290725106974466 0.018492327009970166 0.10270227481847716
-    endmarker
 	*/
+    marker    CLAV_Cor
+        parent    clavicle
+        position    -0.046 0.022 0.11
+    endmarker
+
+    marker    CLAV_TRPZ
+        parent    clavicle
+        position    -0.018 0.022 0.14
+    endmarker
+
 // Information about scapula segment
     // Segment
     segment scapula_parent_offset
@@ -260,6 +265,16 @@ gravity	0 0 -9.81
     marker    SCAP_FRONT
         parent    scapula
         position    -0.0067707151429884371 0.067396741896188495 0.0070532755354774657
+    endmarker
+
+    marker    SCAP_Cor
+        parent    scapula
+        position    -0.018 -0.013 -0.045
+    endmarker
+
+    marker    SCAP_TRPZ
+        parent    scapula
+        position    0 -0.02 -0.038
     endmarker
 
 // Information about humerus segment
