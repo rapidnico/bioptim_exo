@@ -1,6 +1,7 @@
 from enum import Enum
 from pathlib import Path
 import numpy as np
+from casadi import MX
 
 import biorbd_casadi as biorbd
 from bioptim import (
@@ -16,7 +17,7 @@ from bioptim import (
     ControlType,
     InterpolationType,
     RigidBodyDynamics,
-    NoisedInitialGuess,
+    PenaltyNodeList,
     QAndQDotBounds,
     InitialGuess,
     Dynamics,
@@ -27,7 +28,7 @@ from models.utils import thorax_variables
 from models.utils import add_header
 from models.enums import Models
 from data.load_events import LoadEvent
-from load_experimental_data import LoadData
+from tracking.load_experimental_data import LoadData
 
 
 class Tasks(Enum):
@@ -170,17 +171,14 @@ class UpperLimbOCP:
                 qdot_noise_magnitude = np.repeat(0.001, self.n_qdot)
                 x_noise_magnitude = np.concatenate((q_noise_magnitude, qdot_noise_magnitude))
 
-                self.xn_init.add(
-                    NoisedInitialGuess(
-                        initial_guess=self.x_init,
+                self.x_init.add([0] * (self.n_q + self.n_qdot), interpolation=InterpolationType.EACH_FRAME)
+                self.x_init.add_noise(
                         bounds=self.x_bounds,
-                        noise_magnitude=x_noise_magnitude,
-                        n_shooting=self.n_shooting,
-                        interpolation=InterpolationType.EACH_FRAME,
+                        magnitude=x_noise_magnitude,
+                        n_shooting=self.n_shooting + 1,
                         bound_push=0.1,
                         seed=seed,
                     )
-                )
 
                 torque_noise_magnitude = np.repeat(0.005, self.n_tau)
                 torque_noise_magnitude[5:8] = 0
@@ -188,15 +186,13 @@ class UpperLimbOCP:
                 # muscle_noise_magnitude = np.repeat(0.01, self.n_mus)
                 u_noise_magnitude = np.concatenate((torque_noise_magnitude, muscle_noise_magnitude))
 
-                self.un_init.add(
-                    NoisedInitialGuess(
-                        initial_guess=self.u_init,
-                        bounds=self.u_bounds[0],
-                        noise_magnitude=u_noise_magnitude,
-                        n_shooting=self.n_shooting - 1,
+                self.u_init.add([0] * self.n_tau)
+                self.un_init.add_noise(
+                        bounds=self.u_bounds,
+                        magnitude=u_noise_magnitude,
+                        n_shooting=self.n_shooting,
                         bound_push=0,
                         seed=seed,
-                    )
                 )
 
             self.ocp = OptimalControlProgram(
@@ -227,8 +223,8 @@ class UpperLimbOCP:
         qdot_filepath = f"{file_path}{filenames}_qdot.txt"
 
         thorax_values = thorax_variables(q_filepath)  # load c3d floating base pose
-        model_template_path = Models.UPPER_LIMB_XYZ_TEMPLATE.value
-        new_biomod_file = Models.UPPER_LIMB_XYZ_VARIABLES.value
+        model_template_path = Models.WU_WITHOUT_FLOATING_BASE_OFFSET_TEMPLATE.value
+        new_biomod_file = Models.WU_WITHOUT_FLOATING_BASE_OFFSET_VARIABLES.value
 
         biorbd_model = add_header(
             biomod_file_name=model_template_path,
@@ -294,12 +290,28 @@ class UpperLimbOCP:
         else:
             raise ValueError("This dynamics has not been implemented")
 
-    def _set_objective_functions(self):
+    def _set_objective_functions(self) :
         """
         Set the multi-objective functions for each phase with specific weights
         """
 
+        def __custom_ligaments_objectives__(all_pn: PenaltyNodeList) -> MX:
+            CLAV_Cor_index = self.marker_labels.index('CLAV_Cor')
+            CLAV_TRPZ_index = self.marker_labels.index('CLAV_TRPZ')
+            SCAP_Cor_index = self.marker_labels.index('SCAP_Cor')
+            SCAP_TRPZ_index = self.marker_labels.index('SCAP_TRPZ')
+
+            # biorbd.marker_index(all_pn.nlp.model, 'CLAV_Cor')
+            # all_pn.nlp.model.anatomicalMarkerNames()
+            #
+            # markers = all_pn.nlp.model.markers(all_pn.nlp.states["q"].mx)
+
         if self.task == Tasks.TEETH:
+            self.objective_functions.add(
+                __custom_ligaments_objectives__,
+                custom_type=ObjectiveFcn.Lagrange,
+                node=Node.ALL,
+            )
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200
             )  # added
@@ -312,6 +324,11 @@ class UpperLimbOCP:
             )
 
         elif self.task == Tasks.EAT or self.task == Tasks.HEAD:
+            self.objective_functions.add(
+                __custom_ligaments_objectives__,
+                custom_type=ObjectiveFcn.Lagrange,
+                node=Node.ALL,
+            )
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=50)
             self.objective_functions.add(
@@ -324,6 +341,11 @@ class UpperLimbOCP:
             )
 
         elif self.task == Tasks.ARMPIT:
+            self.objective_functions.add(
+                __custom_ligaments_objectives__,
+                custom_type=ObjectiveFcn.Lagrange,
+                node=Node.ALL,
+            )
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=800)  # was 5
             self.objective_functions.add(
@@ -337,6 +359,11 @@ class UpperLimbOCP:
 
         elif self.task == Tasks.DRINK:
             # converges but solution isn't adequate yet
+            self.objective_functions.add(
+                __custom_ligaments_objectives__,
+                custom_type=ObjectiveFcn.Lagrange,
+                node=Node.ALL,
+            )
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=150)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5)
