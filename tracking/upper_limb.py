@@ -1,7 +1,7 @@
 from enum import Enum
 from pathlib import Path
 import numpy as np
-from casadi import MX
+from casadi import MX, norm_2, if_else
 
 import biorbd_casadi as biorbd
 from bioptim import (
@@ -21,8 +21,10 @@ from bioptim import (
     QAndQDotBounds,
     InitialGuess,
     Dynamics,
+    BiorbdInterface,
     Node,
 )
+from sandbox.calcul_distance_ligaments import get_target_value
 
 from models.utils import thorax_variables
 from models.utils import add_header
@@ -80,16 +82,17 @@ class UpperLimbOCP:
     """
 
     def __init__(
-        self,
-        biorbd_model_path: str = None,
-        n_shooting: int = 50,
-        phase_durations: float = 0.5,
-        n_threads: int = 8,
-        ode_solver: OdeSolver = OdeSolver.RK4(),
-        rigidbody_dynamics: RigidBodyDynamics = RigidBodyDynamics.ODE,
-        task: Tasks = Tasks.HEAD,
-        use_sx: bool = False,
-        seed: int = None,
+            self,
+            biorbd_model_path: str = None,
+            n_shooting: int = 50,
+            phase_durations: float = 0.5,
+            n_threads: int = 8,
+            ode_solver: OdeSolver = OdeSolver.RK4(),
+            rigidbody_dynamics: RigidBodyDynamics = RigidBodyDynamics.ODE,
+            task: Tasks = Tasks.HEAD,
+            use_sx: bool = False,
+            seed: int = None,
+            dynamics: DynamicsFcn = DynamicsFcn.MUSCLE_DRIVEN,
     ):
         """
         Parameters
@@ -126,7 +129,6 @@ class UpperLimbOCP:
         self.ode_solver = ode_solver
 
         if biorbd_model_path is not None:
-
             self.biorbd_model = biorbd.Model(biorbd_model_path)
             self.marker_labels = [m.to_string() for m in self.biorbd_model.markerNames()]
             self.rigidbody_dynamics = rigidbody_dynamics
@@ -141,7 +143,7 @@ class UpperLimbOCP:
             self.tau_min, self.tau_init, self.tau_max = -50, 0, 50
             self.muscle_min, self.muscle_max, self.muscle_init = 0, 1, 0.10
 
-            self.dynamics = DynamicsList()
+            self.dynamics = dynamics
             self.constraints = ConstraintList()
             self.objective_functions = ObjectiveList()
 
@@ -183,7 +185,6 @@ class UpperLimbOCP:
                 torque_noise_magnitude = np.repeat(0.005, self.n_tau)
                 torque_noise_magnitude[5:8] = 0
                 muscle_noise_magnitude = np.repeat(0.01, self.n_mus)
-                # muscle_noise_magnitude = np.repeat(0.01, self.n_mus)
                 u_noise_magnitude = np.concatenate((torque_noise_magnitude, muscle_noise_magnitude))
 
                 self.u_init.add([0] * self.n_tau)
@@ -239,12 +240,13 @@ class UpperLimbOCP:
         #     end_frame = event.get_frame(2)
         #     phase_time = event.get_time(2) - event.get_time(1)
         # else:
-        start_frame = event.get_frame(0)
-        end_frame = event.get_frame(1)
+        # start_frame = event.get_frame(0)
+        # end_frame = event.get_frame(1)
+        start_frame = 4
+        end_frame = 179
 
         # enforced time in most cases
         phase_time = event.get_time(2) - event.get_time(1) if self.phase_time is None else self.phase_time
-
         # get target
         data = LoadData(biorbd_model, self.c3d_path, q_filepath, qdot_filepath)
         target = data.get_marker_ref(
@@ -261,10 +263,22 @@ class UpperLimbOCP:
             start=start_frame,
             end=end_frame,
         )
+        q_ref_homemade = np.zeros((self.biorbd_model.nbQ(), 51))
 
+        q_ref_homemade[0, :] = np.linspace(-0.02, -0.21, 51)
+        q_ref_homemade[1, :] = np.linspace(-0.23, 0.09, 51)
+        q_ref_homemade[2, :] = np.linspace(-0.09, 0.15, 51)
+        q_ref_homemade[3, :] = np.linspace(0.13, 0.04, 51)
+        q_ref_homemade[4, :] = np.linspace(0.22, 0.21, 51)
+        q_ref_homemade[5, :] = np.linspace(-0.57, -0.11, 51)
+        q_ref_homemade[6, :] = np.linspace(0.13, 0.65, 51)
+        q_ref_homemade[7, :] = np.linspace(0.06, -0.82, 51)
+
+        tau_ref_homemade = np.zeros((10, 50))
+        qdot_ref_homemade = np.zeros((10, 51))
         # building initial guess
-        self.x_init_ref = np.concatenate([q_ref[6:, :], qdot_ref[6:, :]])  # without floating base
-        self.u_init_ref = tau_ref[6:, :]
+        self.x_init_ref = np.concatenate([q_ref_homemade, qdot_ref_homemade])  # without floating base
+        self.u_init_ref = tau_ref_homemade
 
         nb_q = biorbd_model.nbQ()
         nb_qdot = biorbd_model.nbQdot()
@@ -286,72 +300,80 @@ class UpperLimbOCP:
         """
 
         if self.rigidbody_dynamics == RigidBodyDynamics.ODE:
-            self.dynamics = Dynamics(DynamicsFcn.MUSCLE_DRIVEN, with_torque=True)
+            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+                self.dynamics = Dynamics(self.dynamics, with_torque=True)
+            else:
+                self.dynamics = Dynamics(self.dynamics)
         else:
             raise ValueError("This dynamics has not been implemented")
 
-    def _set_objective_functions(self) :
+    def _set_objective_functions(self):
         """
         Set the multi-objective functions for each phase with specific weights
         """
 
-        def __custom_ligaments_objectives__(all_pn: PenaltyNodeList) -> MX:
-            CLAV_Cor_index = self.marker_labels.index('CLAV_Cor')
-            CLAV_TRPZ_index = self.marker_labels.index('CLAV_TRPZ')
-            SCAP_Cor_index = self.marker_labels.index('SCAP_Cor')
-            SCAP_TRPZ_index = self.marker_labels.index('SCAP_TRPZ')
+        def custom_ligaments_distance(all_pn: PenaltyNodeList, first_marker: str, second_marker: str, L_ref: float) -> MX:
 
-            # biorbd.marker_index(all_pn.nlp.model, 'CLAV_Cor')
-            # all_pn.nlp.model.anatomicalMarkerNames()
-            #
-            # markers = all_pn.nlp.model.markers(all_pn.nlp.states["q"].mx)
+            marker_0 = biorbd.marker_index(all_pn.nlp.model, first_marker)
+            marker_1 = biorbd.marker_index(all_pn.nlp.model, second_marker)
 
-        if self.task == Tasks.TEETH:
-            self.objective_functions.add(
-                __custom_ligaments_objectives__,
-                custom_type=ObjectiveFcn.Lagrange,
-                node=Node.ALL,
+            markers = all_pn.nlp.model.markers(all_pn.nlp.states["q"].mx)
+            markers_diff = markers[marker_1].to_mx() - markers[marker_0].to_mx()
+            markers_diff = BiorbdInterface.mx_to_cx("markers", markers_diff, all_pn.nlp.states["q"])
+
+            markers_diff_norm = norm_2(markers_diff)
+
+            return if_else(
+                markers_diff_norm > L_ref,
+                markers_diff_norm-L_ref,
+                0
             )
-            self.objective_functions.add(
-                ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200
-            )  # added
+
+        target_value_cor, target_value_trpz = get_target_value(self.biorbd_model_path)  # the length of both ligaments
+        target_conoid = np.repeat(target_value_cor, repeats=self.n_shooting + 1)
+        target_trpz = np.repeat(target_value_trpz, repeats=self.n_shooting + 1)
+        if self.task == Tasks.TEETH:
+            # self.objective_functions.add(
+            # ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200
+            # )  # added
+            # self.objective_functions.add(
+            #     ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(2), weight=50
+            # )  # added
+            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=2, weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=5)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5)
-            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
+            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+                self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", weight=15)
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", derivative=True, weight=1500
             )
 
         elif self.task == Tasks.EAT or self.task == Tasks.HEAD:
-            self.objective_functions.add(
-                __custom_ligaments_objectives__,
-                custom_type=ObjectiveFcn.Lagrange,
-                node=Node.ALL,
-            )
-            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
+            # self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
+            # self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(2), weight=0.5)
+            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=2, weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=50)
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5
             )  # added
-            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
+            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+                self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", weight=15)
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", derivative=True, weight=1500
             )
 
         elif self.task == Tasks.ARMPIT:
-            self.objective_functions.add(
-                __custom_ligaments_objectives__,
-                custom_type=ObjectiveFcn.Lagrange,
-                node=Node.ALL,
-            )
-            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
+            # self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
+            # self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(2), weight=50)
+            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=2, weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=800)  # was 5
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5
             )  # added
-            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
+            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+                self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", weight=10)
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", derivative=True, weight=1500
@@ -359,15 +381,13 @@ class UpperLimbOCP:
 
         elif self.task == Tasks.DRINK:
             # converges but solution isn't adequate yet
-            self.objective_functions.add(
-                __custom_ligaments_objectives__,
-                custom_type=ObjectiveFcn.Lagrange,
-                node=Node.ALL,
-            )
-            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
+            # self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(5), weight=200)
+            # self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=range(2), weight=50)
+            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=2, weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=150)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5)
-            self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
+            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+                self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", weight=10)
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", derivative=True, weight=1500
@@ -379,6 +399,26 @@ class UpperLimbOCP:
             raise NotImplementedError("This task is not implemented yet.")
 
         self.objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_STATE, key="qdot", weight=100, node=Node.END)
+        self.objective_functions.add(
+            custom_ligaments_distance,
+            first_marker='CLAV_Conoid',
+            second_marker='SCAP_Conoid',
+            custom_type=ObjectiveFcn.Lagrange,
+            quadratic=True,
+            node=Node.ALL,
+            L_ref=target_conoid[0],
+            weight=200,
+        )
+        self.objective_functions.add(
+            custom_ligaments_distance,
+            first_marker='CLAV_TRPZ',
+            second_marker='SCAP_TRPZ',
+            custom_type=ObjectiveFcn.Lagrange,
+            quadratic=True,
+            node=Node.ALL,
+            L_ref=target_trpz[0],
+            weight=200,
+        )
 
     def _set_initial_guesses(self):
         """
@@ -392,8 +432,11 @@ class UpperLimbOCP:
             x_init_linear[i, :] = np.linspace(self.x_init_ref[i, 0], self.x_init_ref[i, -1], self.n_shooting + 1)
 
         self.x_init = InitialGuess(x_init_linear, interpolation=InterpolationType.EACH_FRAME)
-        self.u_init = InitialGuess([self.tau_init] * self.n_tau + [self.muscle_init] * self.biorbd_model.nbMuscles())
-        # self.u_init = InitialGuess(self.u_init_ref, interpolation=InterpolationType.EACH_FRAME)
+        if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+            self.u_init = InitialGuess(
+                [self.tau_init] * self.n_tau + [self.muscle_init] * self.biorbd_model.nbMuscles())
+        else:
+            self.u_init = InitialGuess(self.u_init_ref, interpolation=InterpolationType.EACH_FRAME)
 
     def _set_boundary_conditions(self):
         """
@@ -421,18 +464,24 @@ class UpperLimbOCP:
             self.x_bounds.min[10, -1] = self.x_init_ref[10, -1]
             self.x_bounds.max[10, -1] = self.x_init_ref[10, -1]
 
-        self.x_bounds.min[self.n_q :, 0] = [-1e-3] * self.biorbd_model.nbQdot()
-        self.x_bounds.max[self.n_q :, 0] = [1e-3] * self.biorbd_model.nbQdot()
-        self.x_bounds.min[self.n_q :, -1] = [-5e-1] * self.biorbd_model.nbQdot()
-        self.x_bounds.max[self.n_q :, -1] = [5e-1] * self.biorbd_model.nbQdot()
+        self.x_bounds.min[self.n_q:, 0] = [-1e-3] * self.biorbd_model.nbQdot()
+        self.x_bounds.max[self.n_q:, 0] = [1e-3] * self.biorbd_model.nbQdot()
+        self.x_bounds.min[self.n_q:, -1] = [-5e-3] * self.biorbd_model.nbQdot()
+        self.x_bounds.max[self.n_q:, -1] = [5e-3] * self.biorbd_model.nbQdot()
 
         if self.biorbd_model.nbQuat() > 0:
             self.x_bounds.min[8:10, 1], self.x_bounds.min[10, 1] = self.x_bounds.min[9:11, 1], -1
             self.x_bounds.max[8:10, 1], self.x_bounds.max[10, 1] = self.x_bounds.max[9:11, 1], 1
 
-        self.u_bounds.add(
-            [self.tau_min] * self.n_tau + [self.muscle_min] * self.biorbd_model.nbMuscleTotal(),
-            [self.tau_max] * self.n_tau + [self.muscle_max] * self.biorbd_model.nbMuscleTotal(),
-        )
+        if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+            self.u_bounds.add(
+                [self.tau_min] * self.n_tau + [self.muscle_min] * self.biorbd_model.nbMuscleTotal(),
+                [self.tau_max] * self.n_tau + [self.muscle_max] * self.biorbd_model.nbMuscleTotal(),
+            )
+        else:
+            self.u_bounds.add(
+                [self.tau_min] * self.n_tau,
+                [self.tau_max] * self.n_tau,
+            )
         self.u_bounds[0][5:8] = 0
         self.u_bounds[0][5:8] = 0
