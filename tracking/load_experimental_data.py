@@ -29,7 +29,7 @@ class C3dData:
 
     def __init__(self, file_path: str, biorbd_model: biorbd.Model):
         self.c3d = c3d(file_path)
-        self.marker_names = [biorbd_model.markerNames()[i].to_string() for i in range(len(biorbd_model.markerNames()))]
+        self.marker_names = [biorbd_model.technicalMarkerNames()[i].to_string() for i in range(len(biorbd_model.technicalMarkerNames()))]
         self.trajectories = self.get_marker_trajectories()
 
     def get_marker_trajectories(self, marker_names: list = None) -> np.ndarray:

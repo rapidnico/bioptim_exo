@@ -1047,3 +1047,195 @@ endmusclegroup
             musclegroup    humerus_to_thorax
             position    0.0021601922432956315 -0.020188568729326291 -0.018507195240228407
         endviapoint
+
+// scapula > radius
+musclegroup scapula_to_radius
+	OriginParent	scapula
+	InsertionParent	radius
+endmusclegroup
+
+	muscle	BIC_L
+		type	degroote
+		musclegroup	scapula_to_radius
+		OriginPosition  -0.038998829 -0.027809759 -0.015221746 //scaled
+	    InsertionPosition   -0.002253241 -0.042248414 -0.002253241 // scaled
+		optimalLength	0.16500000000000001
+		maximalForce	624.29999999999995
+		tendonSlackLength	0.27562999999999999
+		pennationAngle	0
+	endmuscle
+
+		viapoint	bic_l-P2
+			parent	humerus
+			muscle	BIC_L
+			musclegroup	scapula_to_radius
+			position    0.012433665 0.032043854 -0.002327154
+		endviapoint
+
+		viapoint	bic_l-P3
+			parent	humerus
+			muscle	BIC_L
+			musclegroup	scapula_to_radius
+			position    0.023832082 0.019831089 0.000337812 // scaled
+		endviapoint
+
+		viapoint	bic_l-P4
+			parent	humerus
+			muscle	BIC_L
+			musclegroup	scapula_to_radius
+			position    0.031939229 2.32623e-05 0.000140756 // scaled
+		endviapoint
+
+		viapoint	bic_l-P5
+			parent	humerus
+			muscle	BIC_L
+			musclegroup	scapula_to_radius
+			position    0.014434162 -0.044291246 -0.004203894 // scaled
+		endviapoint
+
+		viapoint	bic_l-P6
+			parent	humerus
+			muscle	BIC_L
+			musclegroup	scapula_to_radius
+			position   0.013433967 -0.09037363 -0.002233312 // scaled
+		endviapoint
+
+		viapoint	bic_l-P7
+			parent	humerus
+			muscle	BIC_L
+			musclegroup	scapula_to_radius
+			position    0.019807685 -0.141026517 0.000225209 // scaled
+		endviapoint
+
+		viapoint    bic_l-P8
+			parent  humerus
+			muscle  BIC_L
+			musclegroup scapula_to_radius
+			position    0.026519111 -0.204008122 -0.00591173 // scaled
+		endviapoint
+
+		viapoint    bic_l-P9
+			parent  humerus
+			muscle  BIC_L
+			musclegroup scapula_to_radius
+			position    0.025205253 -0.314516886 -0.00972535 // scaled
+		endviapoint
+
+	muscle	BIC_S
+		type	degroote
+		musclegroup	scapula_to_radius
+		OriginPosition  0.015834356 -0.046459826 -0.030618556 // scaled
+		InsertionPosition   -0.002253241 -0.042248414 -0.002253241 // scaled
+		optimalLength	0.17999999999999999
+		maximalForce	435.56
+		tendonSlackLength	0.19497
+		pennationAngle	0
+	endmuscle
+
+		viapoint	bic_s-P2
+			parent	humerus
+			muscle	BIC_S
+			musclegroup	scapula_to_radius
+			position    0.012991846 -0.088117287 -0.01033139 // scaled
+		endviapoint
+
+		viapoint	bic_s-P3
+			parent	humerus
+			muscle	BIC_S
+			musclegroup	scapula_to_radius
+			position    0.019807685 -0.141026517 -0.010124979 // scaled
+		endviapoint
+
+		viapoint	bic_s-P4
+			parent	humerus
+			muscle	BIC_S
+			musclegroup	scapula_to_radius
+			position    0.026519111 -0.204008122 -0.00591173 // scaled
+		endviapoint
+
+		viapoint	bic_s-P5
+			parent	humerus
+			muscle	BIC_S
+			musclegroup	scapula_to_radius
+			position    0.019725715 -0.312324985 -0.00530475 // scaled
+		endviapoint
+
+// scapula > ulna
+musclegroup scapula_to_ulna
+	OriginParent	scapula
+	InsertionParent	ulna
+endmusclegroup
+
+	muscle	TRIC_LONG
+		type	degroote
+		musclegroup	scapula_to_ulna
+		OriginPosition  -0.048913978 -0.058763232 -0.013845417 // scaled
+		InsertionPosition   -0.022083628 0.010547618 -0.000786539 // scaled
+		optimalLength	0.16500000000000001
+		maximalForce	798.51999999999998
+		tendonSlackLength	0.1484
+		pennationAngle	0.2094
+	endmuscle
+
+		viapoint	tric_long-P2
+			parent	humerus
+			muscle	TRIC_LONG
+			musclegroup	scapula_to_ulna
+			position    -0.021959402 -0.284217147 -0.007863525 // scaled
+		endviapoint
+
+		viapoint	tric_long-P3
+			parent	humerus
+			muscle	TRIC_LONG
+			musclegroup	scapula_to_ulna
+			position    -0.020272996 -0.31121247 -0.011335507 // scaled
+		endviapoint
+
+// humerus > ulna
+musclegroup humerus_to_ulna
+	OriginParent	humerus
+	InsertionParent	ulna
+endmusclegroup
+
+	muscle	TRIC_LAT
+		type	degroote
+		musclegroup	humerus_to_ulna
+		OriginPosition  -0.006967048 -0.147087105 0.004016219 // scaled
+		InsertionPosition   -0.022083628 0.010547618 -0.000786539 // scaled
+		optimalLength	0.086300000000000002
+		maximalForce	624.29999999999995
+		tendonSlackLength	0.1017
+		pennationAngle	0.17000000000000001
+	endmuscle
+
+		viapoint	tric_lat-P2
+			parent	humerus
+			muscle	TRIC_LAT
+			musclegroup	humerus_to_ulna
+			position    -0.02840394 -0.28581055 -0.009862268 // scaled
+		endviapoint
+
+	muscle	TRIC_MED
+		type	degroote
+		musclegroup	humerus_to_ulna
+		OriginPosition  -0.009746861 -0.159287367 -0.008501613 // scaled
+		InsertionPosition   -0.022080289 -0.006142656 -0.000786539 // scaled
+		optimalLength	0.086099999999999996
+		maximalForce	624.29999999999995
+		tendonSlackLength	0.094100000000000003
+		pennationAngle	0.157
+	endmuscle
+
+		viapoint	tric_med-P2
+			parent	humerus
+			muscle	TRIC_MED
+			musclegroup	humerus_to_ulna
+			position    -0.037033501 -0.263294169 -0.011420003 // scaled
+		endviapoint
+
+		viapoint	tric_med-P3
+			parent	humerus
+			muscle	TRIC_MED
+			musclegroup	humerus_to_ulna
+			position    -0.031897007 -0.292273691 -0.011335507 // scaled
+		endviapoint
