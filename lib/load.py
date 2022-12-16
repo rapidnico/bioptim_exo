@@ -18,7 +18,6 @@ def custom_load(file):
         return sol
 
 
-
 def from_bo_to_pickle(file):
 
     #  check if it.s .bo
@@ -32,8 +31,8 @@ def from_bo_to_pickle(file):
 
         data = dict(
             states=a['sol'].states, controls=a['sol'].controls, parameters=a['sol'].parameters, iterations=a['sol'].iterations,
-            cost=np.array(a['sol'].cost)[0][0], detailed_cost=sol.detailed_cost, real_time_to_optimize = a['sol'].real_time_to_optimize,
-            param_scaling = [nlp.parameters.scaling for nlp in ocp.nlp], n_shooting=a["ocp_initializer"]["n_shooting"]
+            cost=np.array(a['sol'].cost)[0][0], detailed_cost=sol.detailed_cost, real_time_to_optimize=a['sol'].real_time_to_optimize,
+            param_scaling=[nlp.parameters.scaling for nlp in ocp.nlp], n_shooting=a["ocp_initializer"]["n_shooting"]
         )
 
     elif ext != ".bo":

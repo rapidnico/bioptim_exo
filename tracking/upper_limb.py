@@ -1,7 +1,7 @@
 from enum import Enum
 from pathlib import Path
 import numpy as np
-from casadi import MX, norm_2, if_else
+from casadi import MX, norm_2, if_else, acos, dot
 
 import biorbd_casadi as biorbd
 from bioptim import (
@@ -140,7 +140,7 @@ class UpperLimbOCP:
             self.n_tau = self.biorbd_model.nbGeneralizedTorque() - self.biorbd_model.nbRoot()
             self.n_mus = self.biorbd_model.nbMuscleTotal()
 
-            self.tau_min, self.tau_init, self.tau_max = -50, 0, 50
+            self.tau_min, self.tau_init, self.tau_max = -25, 0, 25
             self.muscle_min, self.muscle_max, self.muscle_init = 0, 1, 0.10
 
             self.dynamics = dynamics
@@ -342,7 +342,7 @@ class UpperLimbOCP:
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=2, weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=5)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5)
-            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+            if self.dynamics.type == DynamicsFcn.MUSCLE_DRIVEN:
                 self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", weight=15)
             self.objective_functions.add(
@@ -357,7 +357,7 @@ class UpperLimbOCP:
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5
             )  # added
-            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+            if self.dynamics.type == DynamicsFcn.MUSCLE_DRIVEN:
                 self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", weight=15)
             self.objective_functions.add(
@@ -372,7 +372,7 @@ class UpperLimbOCP:
             self.objective_functions.add(
                 ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5
             )  # added
-            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+            if self.dynamics.type == DynamicsFcn.MUSCLE_DRIVEN:
                 self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", weight=10)
             self.objective_functions.add(
@@ -386,7 +386,7 @@ class UpperLimbOCP:
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="q", index=2, weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", weight=150)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_STATE, key="qdot", derivative=True, weight=0.5)
-            if self.dynamics == DynamicsFcn.MUSCLE_DRIVEN:
+            if self.dynamics.type == DynamicsFcn.MUSCLE_DRIVEN:
                 self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="muscles", weight=1000)
             self.objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", weight=10)
             self.objective_functions.add(
@@ -419,6 +419,11 @@ class UpperLimbOCP:
             L_ref=target_trpz[0],
             weight=200,
         )
+
+    def _set_constraint_functions(self):
+        """
+        Set the multi-objective functions for each phase with specific weights
+        """
 
     def _set_initial_guesses(self):
         """
